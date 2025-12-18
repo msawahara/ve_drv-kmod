@@ -180,12 +180,16 @@ static void ve_vm_open(struct vm_area_struct *vma)
 
 	pdev_trace(vedev->pdev);
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 3, 0)
 	/*
 	 * This vma is NOT managed by struct page (just PFN)
 	 * This vma is memory mapped I/O
 	 * This vma must NOT be copied on fork
 	 */
 	vma->vm_flags |= VM_PFNMAP | VM_IO | VM_DONTCOPY;
+#else
+	vm_flags_set(vma, VM_PFNMAP | VM_IO | VM_DONTCOPY);
+#endif
 }
 
 /**

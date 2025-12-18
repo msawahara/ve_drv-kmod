@@ -47,6 +47,7 @@
 #include "ve_drv.h"
 #include "internal.h"
 #include "mmio.h"
+#include "vepci.h"
 #define VE_MAX_DEVICES         (1U << MINORBITS)
 #define VE_REMOVE_TIMEOUT_MSECS	40
 
@@ -142,11 +143,17 @@ const struct ve_arch_class *ve_drv_probe_arch_class(struct ve_dev *vedev)
  *
  * @return always 0
  */
+
 #if RHEL_RELEASE_VERSION(RHEL_MAJOR, RHEL_MINOR) > RHEL_RELEASE_VERSION(8, 8)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 4, 0)
 static int ve_dev_uevent(RH_KABI_CONST struct device *dev, struct kobj_uevent_env *env)
+#else
+static int ve_dev_uevent(const struct device *dev, struct kobj_uevent_env *env)
+#endif
 #else
 static int ve_dev_uevent(struct device *dev, struct kobj_uevent_env *env)
 #endif
+
 {
 	add_uevent_var(env, "DEVMODE=%#o", 0666);
 	return 0;
@@ -157,7 +164,9 @@ static int ve_dev_uevent(struct device *dev, struct kobj_uevent_env *env)
  */
 static struct class ve_class = {
 	.name = "ve",
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 4, 0)
 	.owner = THIS_MODULE,
+#endif
 	.dev_uevent = ve_dev_uevent,
 };
 
@@ -932,7 +941,11 @@ int ve_prepare_for_link_down(struct ve_dev *vedev, u16 *aer_cap,
 	} else if (*aer_cap & PCI_EXP_AER_FLAGS) {
 		/* AER should be disabled temporarily if it is enabled */
 	        /* ignore err 48740 */
+#if (KERNEL_VERSION(6, 5, 0) > LINUX_VERSION_CODE)
 		err_discard = pci_disable_pcie_error_reporting(parent);
+#else
+		err_discard = pcie_capability_clear_and_set_word(parent, PCI_EXP_DEVCTL, PCI_EXP_AER_FLAGS, 0);
+#endif
 		pdev_dbg(parent, "AER is temporarily disabled (%d:%d)\n", err,err_discard);
 	} else
 		pdev_dbg(parent, "AER is not enabled (did nothing)\n");
@@ -972,76 +985,6 @@ int ve_check_pci_link(struct pci_dev *pdev)
 	}
 
 	pdev_dbg(pdev, "Reading VendorID success (0x%x)\n", vendor);
-	return 0;
-}
-
-#if (KERNEL_VERSION(5, 0, 0) <= LINUX_VERSION_CODE)
-/* Copied from vmlinux.h */
-struct pci_cap_saved_data {
-	u16 cap_nr;
-	bool cap_extended;
-	unsigned int size;
-	u32 data[0];
-};
-struct pci_cap_saved_state {
-	struct hlist_node next;
-	struct pci_cap_saved_data cap;
-};
-#endif
-/* Copied from drivers/pci/pci.c */
-static struct pci_cap_saved_state *_pci_find_saved_cap(struct pci_dev *pci_dev,
-		u16 cap, bool extended)
-{
-	struct pci_cap_saved_state *tmp;
-
-	hlist_for_each_entry(tmp, &pci_dev->saved_cap_space, next) {
-		if (tmp->cap.cap_extended == extended && tmp->cap.cap_nr == cap)
-			return tmp;
-	}
-	return NULL;
-}
-
-/* Copied from drivers/pci/pci.c */
-struct pci_cap_saved_state *pci_find_saved_cap(struct pci_dev *dev, char cap)
-{
-	return _pci_find_saved_cap(dev, cap, false);
-}
-
-/**
- * Save LNKCTL2 to reserve current state
- * This is modified version of pci_save_pcie_state() in drivers/pci/pci.c
- */
-static int pci_save_state_lnkctl2_only(struct pci_dev *dev)
-{
-	int i = 0;
-	struct pci_cap_saved_state *save_state;
-	u16 *cap;
-
-	if (!pci_is_pcie(dev))
-		return 0;
-
-	save_state = pci_find_saved_cap(dev, PCI_CAP_ID_EXP);
-	if (!save_state) {
-		dev_err(&dev->dev, "buffer not found in %s\n", __func__);
-		return -ENOMEM;
-	}
-
-	cap = (u16 *)&save_state->cap.data[0];
-	/* PCI_EXP_DEVCTL */
-	i++;
-	/* PCI_EXP_LNKCTL */
-	i++;
-	/* PCI_EXP_SLTCTL */
-	i++;
-	/* PCI_EXP_RTCTL */
-	i++;
-	/* PCI_EXP_DEVCTL2 */
-	i++;
-	/* PCI_EXP_LNKCTL2 */
-	pcie_capability_read_word(dev, PCI_EXP_LNKCTL2, &cap[i++]);
-	/* PCI_EXP_SLTCTL2 */
-	i++;
-
 	return 0;
 }
 
@@ -1137,7 +1080,11 @@ int ve_recover_from_link_down(struct ve_dev *vedev, u16 *aer_cap,
  train_end:
 	/* AER config should be restored */
 	if (*aer_cap & PCI_EXP_AER_FLAGS) {
+#if (KERNEL_VERSION(6, 5, 0) > LINUX_VERSION_CODE)
 		err = pci_enable_pcie_error_reporting(parent);
+#else
+		err = pcie_capability_clear_and_set_word(parent, PCI_EXP_DEVCTL, 0, PCI_EXP_AER_FLAGS);
+#endif
 		pdev_dbg(parent, "AER is re-enabled\n");
 	}
 

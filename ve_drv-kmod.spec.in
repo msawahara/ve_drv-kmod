@@ -39,6 +39,12 @@ Vendor:		NEC Corporation
 Packager:	NEC Corporation
 BuildRequires:	vp-kmod-devel >= 0.4.1
 Requires:       vp-kmod >= 0.4.1
+%if 0%{?rhel} >= 10
+Requires:       policycoreutils
+Requires:       policycoreutils-python-utils
+Requires:       selinux-policy
+BuildRequires:  checkpolicy
+%endif
 
 %description
 VE Driver kernel modules.
@@ -59,15 +65,26 @@ use ve_drv module
 
 # Magic hidden here.
 %{expand:%(sh %{SOURCE10} rpmtemplate %{kmod_name} %{KVER} "")}
-
+%if 0%{?rhel} >= 10
+%global __perl /usr/bin/perl
+%endif
 %prep
+%if 0%{?rhel} >= 10
+export PERL=%{__perl}
+%endif
 %setup -q -a 0
 echo "override %{kmod_name} * weak-updates/%{kmod_name}" > kmod-%{kmod_name}.conf
 
 %build
+%if 0%{?rhel} >= 10
+export PERL=%{__perl}
+%endif
 %configure --with-release-id=@RELEASE@ --with-systemd-unitdir=@SYSTEMD_UNITDIR@ --with-kernel=%{KVER}
-export KBUILD_MODPOST_WARN=1
 make %{?_smp_mflags}
+%if 0%{?rhel} >= 10
+/usr/bin/checkmodule -M -m -o helper/ve_drv.mod helper/ve_drv.te
+/usr/bin/semodule_package -o helper/ve_drv.pp -m helper/ve_drv.mod
+%endif
 
 %install
 %{__rm} -rf $RPM_BUILD_ROOT
@@ -78,8 +95,13 @@ make install DESTDIR=$RPM_BUILD_ROOT
 %{__install} kmod-%{kmod_name}.conf $RPM_BUILD_ROOT%{_sysconfdir}/depmod.d/
 mkdir -p $RPM_BUILD_ROOT/opt/nec/ve/veos/libexec/
 install -m 755 helper/ve_check_config $RPM_BUILD_ROOT/opt/nec/ve/veos/libexec/
+install -m 755 helper/ve_check_config_wrapper $RPM_BUILD_ROOT/opt/nec/ve/veos/libexec/
 # Set the module(s) to be executable, so that they will be stripped when packaged.
 find $RPM_BUILD_ROOT -type f -name \*.ko -exec %{__chmod} u+x \{\} \;
+%if 0%{?rhel} >= 10
+mkdir -p $RPM_BUILD_ROOT/usr/share/selinux/packages/
+install -m 755 helper/ve_drv.pp $RPM_BUILD_ROOT/usr/share/selinux/packages/
+%endif
 
 %clean
 %{__rm} -rf $RPM_BUILD_ROOT
@@ -101,7 +123,9 @@ fi
 %config(noreplace) %{_sysconfdir}/dracut.conf.d/*
 /lib/modules/%{KVER}/extra/*
 %config @SYSTEMD_UNITDIR@/*
-/opt/nec/ve/veos/libexec/ve_check_config
+%if 0%{?rhel} >= 10
+/usr/share/selinux/packages/ve_drv.pp
+%endif
 
 %files devel
 %defattr(-,root,root,-)

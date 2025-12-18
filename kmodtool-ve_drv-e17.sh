@@ -40,6 +40,8 @@
 #                         moving to a newer format and in any case do not
 #                         need to retain support for really old systems.
 
+# Changes by NEC Corporation for the VE port, 2017-2025
+
 shopt -s extglob
 
 myprog="kmodtool"
@@ -178,6 +180,9 @@ EOF
 ## that will be executed by RPM during various stages of package processing ##
 ##############################################################################
 
+#get OS version
+local OS_VERSION=$(cat /etc/os-release | grep VERSION_ID | cut -d '"' -f 2 | cut -d '.' -f 1)
+
 cat <<EOF
 %post
 /sbin/depmod -a
@@ -188,6 +193,15 @@ modules=(\$(find /lib/modules/${verrel}${dotvariant}/extra/${kmod_name}.ko | gre
 if [ -x "/sbin/weak-modules" ]; then
     printf '%s\n' "\${modules[@]}" | /sbin/weak-modules --add-modules
 fi
+EOF
+if [ $OS_VERSION -ge 10 ]; then
+cat << EOF
+/usr/sbin/semodule -i /usr/share/selinux/packages/ve_drv.pp
+/usr/sbin/semanage fcontext -a -t ve_drv_script_helper_exec_t /opt/nec/ve/veos/libexec/ve_check_config_wrapper || true
+/usr/sbin/restorecon -v /opt/nec/ve/veos/libexec/ve_check_config_wrapper
+EOF
+fi
+cat <<EOF
 /bin/systemctl enable ve_drv
 case "\$1" in
         1)
@@ -219,6 +233,15 @@ case "\$1" in
         then
                 /sbin/modprobe -r ve_drv
         fi
+EOF
+        if [ $OS_VERSION -ge 10 ]; then
+cat << EOF
+        /usr/sbin/semanage fcontext -d /opt/nec/ve/veos/libexec/ve_check_config_wrapper
+        /usr/sbin/restorecon -v /opt/nec/ve/veos/libexec/ve_check_config_wrapper
+        /usr/sbin/semodule -r ve_drv || true
+EOF
+        fi
+cat <<EOF
         ;;
         1)
         # upgrade

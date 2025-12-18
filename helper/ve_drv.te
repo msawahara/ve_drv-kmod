@@ -1,0 +1,105 @@
+module ve_drv 1.0;
+
+type ve_drv_script_helper_exec_t;
+type ve_drv_script_helper_t;
+
+require {
+        type kernel_generic_helper_t;
+        type kernel_t;
+        role system_r;
+        type shell_exec_t;
+        type ld_so_t;
+        type ld_so_cache_t;
+        type root_t;
+        type usr_t;
+        type lib_t;
+        type etc_t;
+        type user_devpts_t;
+        type null_device_t;
+        type passwd_file_t;
+        type device_t;
+        type devlog_t;
+        type sysfs_t;
+        type devtty_t;
+        type proc_t;
+        type selinux_config_t;
+        type security_t;
+        type var_run_t;
+        type var_t;
+        type init_var_run_t;
+        type syslogd_var_run_t;
+        type locale_t;
+        type admin_home_t;
+        type bin_t;
+        attribute file_type;
+        class file { read open execute execute_no_trans entrypoint map  write getattr ioctl append lock };
+        class process { transition noatsecure rlimitinh siginh fork };
+        class fd { use };
+        class chr_file { read write open getattr ioctl };
+        class dir { search getattr read open };
+        class lnk_file { read };
+        class fifo_file { read getattr ioctl write };
+        class sock_file { write };
+        class filesystem { getattr };
+        class unix_dgram_socket { create connect sendto write };
+        class unix_stream_socket { create connect };
+}
+
+typeattribute ve_drv_script_helper_exec_t file_type;
+role system_r types ve_drv_script_helper_t;
+
+type_transition kernel_t ve_drv_script_helper_exec_t:process ve_drv_script_helper_t;
+
+#============= kernel_generic_helper_t ==============
+allow kernel_generic_helper_t ve_drv_script_helper_exec_t:file { read execute open map };
+allow kernel_generic_helper_t ve_drv_script_helper_t:process transition;
+#============= kernel_t ==============
+allow kernel_t ve_drv_script_helper_t:process { transition noatsecure siginh rlimitinh };
+allow kernel_t ve_drv_script_helper_t:fd { use };
+#============= ve_drv_script_helper_exec_t ==============
+allow ve_drv_script_helper_exec_t ve_drv_script_helper_t:file { entrypoint map };
+#============= ve_drv_script_helper_t ==============
+allow ve_drv_script_helper_t ve_drv_script_helper_exec_t:file { entrypoint map read execute };
+allow ve_drv_script_helper_t ve_drv_script_helper_t:process { fork };
+allow ve_drv_script_helper_t ve_drv_script_helper_t:file { read open  };
+allow ve_drv_script_helper_t ve_drv_script_helper_t:fifo_file { read getattr ioctl write };
+allow ve_drv_script_helper_t ve_drv_script_helper_t:unix_dgram_socket { create connect write };
+allow ve_drv_script_helper_t ve_drv_script_helper_t:unix_stream_socket { create connect };
+allow ve_drv_script_helper_t ve_drv_script_helper_t:dir { search };
+allow ve_drv_script_helper_t bin_t:file { entrypoint execute read open execute_no_trans getattr ioctl map };
+allow ve_drv_script_helper_t bin_t:dir { search getattr read open };
+allow ve_drv_script_helper_t bin_t:lnk_file { read };
+allow ve_drv_script_helper_t shell_exec_t:file { map read execute open };
+allow ve_drv_script_helper_t null_device_t:chr_file { read write open getattr ioctl };
+allow ve_drv_script_helper_t ld_so_t:file { read map execute open };
+allow ve_drv_script_helper_t ld_so_cache_t:file { read open getattr map };
+allow ve_drv_script_helper_t root_t:dir { search getattr read open };
+allow ve_drv_script_helper_t usr_t:dir { search getattr };
+allow ve_drv_script_helper_t lib_t:dir { getattr search read open };
+allow ve_drv_script_helper_t lib_t:lnk_file { read };
+allow ve_drv_script_helper_t lib_t:file { read open getattr map execute ioctl };
+allow ve_drv_script_helper_t etc_t:dir { search };
+allow ve_drv_script_helper_t etc_t:lnk_file { read };
+allow ve_drv_script_helper_t etc_t:file { read getattr open };
+allow ve_drv_script_helper_t passwd_file_t:file { read open getattr };
+allow ve_drv_script_helper_t device_t:dir { search };
+allow ve_drv_script_helper_t sysfs_t:dir { search read open getattr };
+allow ve_drv_script_helper_t sysfs_t:filesystem { getattr };
+allow ve_drv_script_helper_t devtty_t:chr_file { read write open };
+allow ve_drv_script_helper_t proc_t:dir { search };
+allow ve_drv_script_helper_t proc_t:lnk_file { read };
+allow ve_drv_script_helper_t selinux_config_t:dir { search };
+allow ve_drv_script_helper_t security_t:filesystem { getattr };
+allow ve_drv_script_helper_t var_run_t:dir { search };
+allow ve_drv_script_helper_t var_t:dir { search };
+allow ve_drv_script_helper_t var_t:file { append open read lock ioctl getattr };
+allow ve_drv_script_helper_t init_var_run_t:dir { search };
+allow ve_drv_script_helper_t syslogd_var_run_t:dir { search };
+allow ve_drv_script_helper_t devlog_t:lnk_file { read };
+allow ve_drv_script_helper_t devlog_t:sock_file { write };
+allow ve_drv_script_helper_t locale_t:lnk_file { read };
+allow ve_drv_script_helper_t locale_t:dir { search };
+allow ve_drv_script_helper_t locale_t:file { read open getattr map };
+allow ve_drv_script_helper_t admin_home_t:dir { search };
+allow ve_drv_script_helper_t kernel_t:unix_dgram_socket { sendto };
+allow ve_drv_script_helper_t kernel_t:fd { use };

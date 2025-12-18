@@ -35,22 +35,23 @@ EXTRA_DIST = src/Makefile src/main.c src/main_ve1.c src/main_ve3.c \
 	     src/hw.h src/hw_ve1.h src/hw_ve3.h src/gen_code.sh \
 	     src/mmio.h src/mmio_ve1.h src/mmio_ve3.h \
 	     src/ve_drv.conf \
-	     src/Module.symvers src/vp.h $(SENSOR_HDRS) src/sensor_ve1.tbl src/sensor_ve3.tbl \
+	     src/vp.h $(SENSOR_HDRS) src/sensor_ve1.tbl src/sensor_ve3.tbl \
 	     src/commitid.h \
+	     src/vepci.c src/vepci.h \
 	     src/ve_drv-ctl systemd/ve_drv.service.in \
 	     dracut/ve_drv.conf \
 	     ve_drv-kmod.spec \
 	     debian
 CLEANFILES = systemd/ve_drv.service $(SENSOR_HDRS) src/commitid.h
-dist_noinst_DATA = helper/ve_check_config
+dist_noinst_DATA = helper/ve_check_config helper/ve_drv.te
+noinst_PROGRAMS = helper/ve_check_config_wrapper
+
+ve_check_config_wrapper_SOURCES = header/ve_check_config_wrapper.c
 
 # git commit id
 src/commitid.h:
 	echo "#define COMMITID \"`git log --pretty=format:"%H" -n 1`\"" >> $@
 
-# symvers of vp module
-src/Module.symvers:
-	cp @prefix@/src/ve_kernel/Module.symvers $(abs_top_builddir)/src
 # header file of vp module
 src/vp.h:
 	cp @prefix@/include/vp.h $(abs_top_builddir)/src
@@ -61,11 +62,12 @@ src/sensor_ve3.h: src/sensor_ve3.tbl
 	$(srcdir)/src/gen_code.sh $(srcdir)/src/sensor_ve3.tbl > sensor_ve3.h
 	mv sensor_ve3.h $(abs_top_builddir)/src/
 
-src/ve_drv.ko: src/Module.symvers src/vp.h $(SENSOR_HDRS) src/sensor_ve1.tbl src/sensor_ve3.tbl src/commitid.h
+src/ve_drv.ko: src/vp.h $(SENSOR_HDRS) src/sensor_ve1.tbl src/sensor_ve3.tbl src/commitid.h
 	for file in $(EXTRA_DIST); do \
 		test -f $(builddir)/$$file || \
 		$(LN_S) $(abs_top_srcdir)/$$file $(builddir)/src; \
 	done
+	KBUILD_EXTRA_SYMBOLS=/opt/nec/ve/veos/src/ve_kernel/Module.symvers \
 	$(MAKE) -C $(KERNEL_SRC) M=$(abs_top_builddir)/src
 
 all-local: src/ve_drv.ko
@@ -89,7 +91,6 @@ clean-local:
 	$(RM) $(abs_top_builddir)/$(SENSOR_HDRS)
 	$(RM) $(abs_top_builddir)/src/commitid.h
 	$(RM) $(abs_top_builddir)/src/vp.h
-	$(RM) $(abs_top_builddir)/src/Module.symvers
 
 rpm: dist
 	mkdir -p $(distdir)/rpmbuild/{BUILD,RPMS,SOURCES,SRPMS,SPECS}

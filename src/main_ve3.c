@@ -548,7 +548,7 @@ static int ve3_check_config_test(struct ve_dev *vedev, int notify)
 	argv[4] = NULL;
 
         rv = call_usermodehelper(
-				 "/opt/nec/ve/veos/libexec/ve_check_config",
+				 "/opt/nec/ve/veos/libexec/ve_check_config_wrapper",
 				 argv, envp, UMH_WAIT_PROC);
 	/*
 	 * caller must mutex lock
