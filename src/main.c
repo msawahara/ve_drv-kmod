@@ -144,12 +144,10 @@ const struct ve_arch_class *ve_drv_probe_arch_class(struct ve_dev *vedev)
  * @return always 0
  */
 
-#if RHEL_RELEASE_VERSION(RHEL_MAJOR, RHEL_MINOR) > RHEL_RELEASE_VERSION(8, 8)
-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 4, 0)
+#if (RHEL_RELEASE_GE(8, 9)) && (RHEL_RELEASE_LT(9, 0))
 static int ve_dev_uevent(RH_KABI_CONST struct device *dev, struct kobj_uevent_env *env)
-#else
+#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 2, 0)) || (RHEL_RELEASE_GE(9, 3))
 static int ve_dev_uevent(const struct device *dev, struct kobj_uevent_env *env)
-#endif
 #else
 static int ve_dev_uevent(struct device *dev, struct kobj_uevent_env *env)
 #endif

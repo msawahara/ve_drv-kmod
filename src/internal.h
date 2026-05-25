@@ -41,6 +41,15 @@
 #include "ve_drv.h"
 #include <linux/version.h>
 
+/* rhel compatible macros */
+#if defined(RHEL_RELEASE_CODE)
+#define RHEL_RELEASE_GE(a, b) ((RHEL_RELEASE_CODE >= RHEL_RELEASE_VERSION(a, b)))
+#define RHEL_RELEASE_LT(a, b) ((RHEL_RELEASE_CODE < RHEL_RELEASE_VERSION(a, b)))
+#else
+#define RHEL_RELEASE_GE(a, b) (0)
+#define RHEL_RELEASE_LT(a, b) (0)
+#endif
+
 /* print macros */
 #define pdev_trace(pdev) dev_dbg(&pdev->dev, "trace")
 #define pdev_dbg(pdev, fmt, args...) dev_dbg(&pdev->dev, fmt, ## args)

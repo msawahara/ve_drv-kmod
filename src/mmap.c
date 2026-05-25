@@ -119,7 +119,7 @@ int ve_drv_mmap(struct file *filp, struct vm_area_struct *vma)
 	}
 	task->mmap = true;
 	spin_unlock_irqrestore(&vedev->node->lock, flags);
-#if RHEL_RELEASE_VERSION(RHEL_MAJOR, RHEL_MINOR) > RHEL_RELEASE_VERSION(8, 5)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 12, 0)) || (RHEL_RELEASE_GE(8, 6))
 	//
 	// VM_PFNMAP with only VM_SHARED , no VM_PRIVATE
 	//
@@ -288,7 +288,7 @@ static int ve_vm_fault(struct vm_fault *vmf)
 static vm_fault_t ve_vm_fault(struct vm_fault *vmf)
 {
 	struct vm_area_struct *vma = vmf->vma;
-#if (RHEL_RELEASE_VERSION(8,2) <= RHEL_RELEASE_CODE)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 0)) || (RHEL_RELEASE_GE(8, 2))
 	vm_fault_t fault_reason;
 #endif
 #endif
@@ -336,17 +336,7 @@ static vm_fault_t ve_vm_fault(struct vm_fault *vmf)
 	vaddr_start = ((unsigned long)vmf->address) & PAGE_MASK;
 #endif
 
-#if (RHEL_RELEASE_VERSION(8,2) > RHEL_RELEASE_CODE)
-	pdev_dbg(vedev->pdev, "vm_insert_pfn (va=%p, pfn=%lu)\n",
-			(void *)vaddr_start, pfn);
-	err = vm_insert_pfn(vma, vaddr_start, pfn);
-	if (err == 0 || err == -EBUSY)
-		return VM_FAULT_NOPAGE;
-
-	pdev_err(vedev->pdev,
-			"vm_insert_pfn(va=%p, pfn=%lu): returned %d\n",
-			(void *)vaddr_start, pfn, err);
-#else
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 0)) || (RHEL_RELEASE_GE(8, 2))
 	pdev_dbg(vedev->pdev, "vmf_insert_pfn (va=%p, pfn=%lu)\n",
 			(void *)vaddr_start, pfn);
 	fault_reason = vmf_insert_pfn(vma, vaddr_start, pfn);
@@ -356,6 +346,16 @@ static vm_fault_t ve_vm_fault(struct vm_fault *vmf)
 	pdev_err(vedev->pdev,
 			"vmf_insert_pfn(va=%p, pfn=%lu): returned %d\n",
 			(void *)vaddr_start, pfn, fault_reason);
+#else
+	pdev_dbg(vedev->pdev, "vm_insert_pfn (va=%p, pfn=%lu)\n",
+			(void *)vaddr_start, pfn);
+	err = vm_insert_pfn(vma, vaddr_start, pfn);
+	if (err == 0 || err == -EBUSY)
+		return VM_FAULT_NOPAGE;
+
+	pdev_err(vedev->pdev,
+			"vm_insert_pfn(va=%p, pfn=%lu): returned %d\n",
+			(void *)vaddr_start, pfn, err);
 #endif
 	return VM_FAULT_SIGBUS;
 }
