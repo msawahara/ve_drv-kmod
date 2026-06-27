@@ -328,35 +328,6 @@ static int ve_drv_wait_exception(struct file *filp, uint64_t __user *user_exs)
 }
 
 /**
- * @brief Get the number of VE core
- *
- * @param[in] vedev: VE device structure
- *
- * @return number of VE core
- */
-int ve_drv_get_core_num(struct ve_dev *vedev)
-{
-	pdev_trace(vedev->pdev);
-
-	return vedev->node->hw_info.num_of_core;
-}
-
-/**
- * @brief Get physical memory size of VE
- *
- * @param[in] vedev: VE device structure
- * @param[out] size: Size of memory will be stored
- *
- * @return 0 on success. Negative on failure.
- */
-int ve_drv_get_memory_size(struct ve_dev *vedev, uint64_t __user *size)
-{
-	pdev_trace(vedev->pdev);
-
-	return put_user(vedev->node->hw_info.memory_size, size);
-}
-
-/**
  * @brief Print task information to the buffer
  *        This function is called via sysfs
  *
