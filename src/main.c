@@ -162,7 +162,7 @@ static int ve_dev_uevent(struct device *dev, struct kobj_uevent_env *env)
  */
 static struct class ve_class = {
 	.name = "ve",
-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 4, 0)
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 4, 0)) && (NOT_RHEL_OR_RHEL_RELEASE_LT(9, 4))
 	.owner = THIS_MODULE,
 #endif
 	.dev_uevent = ve_dev_uevent,
@@ -939,7 +939,7 @@ static int ve_prepare_for_link_down(struct ve_dev *vedev, u16 *aer_cap,
 	} else if (*aer_cap & PCI_EXP_AER_FLAGS) {
 		/* AER should be disabled temporarily if it is enabled */
 	        /* ignore err 48740 */
-#if (KERNEL_VERSION(6, 5, 0) > LINUX_VERSION_CODE)
+#if (KERNEL_VERSION(6, 5, 0) > LINUX_VERSION_CODE) && (NOT_RHEL_OR_RHEL_RELEASE_LT(9, 4))
 		err_discard = pci_disable_pcie_error_reporting(parent);
 #else
 		err_discard = pcie_capability_clear_and_set_word(parent, PCI_EXP_DEVCTL, PCI_EXP_AER_FLAGS, 0);
@@ -1078,7 +1078,7 @@ int ve_recover_from_link_down(struct ve_dev *vedev, u16 *aer_cap,
  train_end:
 	/* AER config should be restored */
 	if (*aer_cap & PCI_EXP_AER_FLAGS) {
-#if (KERNEL_VERSION(6, 5, 0) > LINUX_VERSION_CODE)
+#if (KERNEL_VERSION(6, 5, 0) > LINUX_VERSION_CODE) && (NOT_RHEL_OR_RHEL_RELEASE_LT(9, 4))
 		err = pci_enable_pcie_error_reporting(parent);
 #else
 		err = pcie_capability_clear_and_set_word(parent, PCI_EXP_DEVCTL, 0, PCI_EXP_AER_FLAGS);

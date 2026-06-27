@@ -45,9 +45,11 @@
 #if defined(RHEL_RELEASE_CODE)
 #define RHEL_RELEASE_GE(a, b) ((RHEL_RELEASE_CODE >= RHEL_RELEASE_VERSION(a, b)))
 #define RHEL_RELEASE_LT(a, b) ((RHEL_RELEASE_CODE < RHEL_RELEASE_VERSION(a, b)))
+#define NOT_RHEL_OR_RHEL_RELEASE_LT(a, b) ((RHEL_RELEASE_CODE < RHEL_RELEASE_VERSION(a, b)))
 #else
 #define RHEL_RELEASE_GE(a, b) (0)
 #define RHEL_RELEASE_LT(a, b) (0)
+#define NOT_RHEL_OR_RHEL_RELEASE_LT(a, b) (1)
 #endif
 
 /* print macros */

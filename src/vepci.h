@@ -30,7 +30,8 @@
 #define VEDRIVER_VEPCI_H
 #include <linux/pci.h>
 #include <linux/version.h>
-#if (KERNEL_VERSION(5, 15, 0) <= LINUX_VERSION_CODE)
+#include "internal.h"
+#if (KERNEL_VERSION(5, 15, 0) <= LINUX_VERSION_CODE) || (RHEL_RELEASE_GE(9, 0))
 #include <linux/types.h>
 #include <linux/list.h>
 

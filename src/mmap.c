@@ -180,7 +180,7 @@ static void ve_vm_open(struct vm_area_struct *vma)
 
 	pdev_trace(vedev->pdev);
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 3, 0)
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 3, 0)) && NOT_RHEL_OR_RHEL_RELEASE_LT(9, 5)
 	/*
 	 * This vma is NOT managed by struct page (just PFN)
 	 * This vma is memory mapped I/O
