@@ -1044,11 +1044,11 @@ int ve_drv_reset_intr_count(struct ve_dev *vedev, uint64_t core_id)
 
 	return 0;
 }
-#if (KERNEL_VERSION(5, 0, 0) <= LINUX_VERSION_CODE)
+#if (KERNEL_VERSION(5, 6, 0) <= LINUX_VERSION_CODE)
 static inline unsigned long timespec_to_jiffies(const struct timespec *value)
 {
 	struct timespec64 ts = *(const struct timespec64 *)(value);
-        return timespec64_to_jiffies(&ts);
+	return timespec64_to_jiffies(&ts);
 }
 #endif
 /**

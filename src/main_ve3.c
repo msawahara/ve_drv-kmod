@@ -760,7 +760,7 @@ int ve_drv_ve3_reset(struct ve_dev *vedev, uint64_t reset_level)
 	case 1:
 		pdev_info(vedev->pdev->bus->self, "Reset Secondary Bus\n");
 
-#if (KERNEL_VERSION(4, 10, 0) > LINUX_VERSION_CODE)
+#if (KERNEL_VERSION(4, 19, 0) > LINUX_VERSION_CODE)
 		pci_reset_bridge_secondary_bus(vedev->pdev->bus->self);
 #else
 		pci_bridge_secondary_bus_reset(vedev->pdev->bus->self);

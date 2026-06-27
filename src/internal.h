@@ -57,7 +57,7 @@
 #define pdev_info(pdev, fmt, args...) dev_info(&pdev->dev, fmt, ## args)
 #define pdev_warn(pdev, fmt, args...) dev_warn(&pdev->dev, fmt, ## args)
 
-#if (KERNEL_VERSION(5, 0, 0) <= LINUX_VERSION_CODE)
+#if (KERNEL_VERSION(5, 6, 0) <= LINUX_VERSION_CODE)
 #define timespec timespec64
 #endif
 
