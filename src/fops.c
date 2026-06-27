@@ -211,7 +211,7 @@ static inline uint64_t ve_get_exs(struct ve_dev *vedev, int core_id)
  *         -ESRCH if the VE task id is not same as current tid
  *                if task is not created.
  */
-int ve_drv_wait_exception(struct file *filp, uint64_t __user *user_exs)
+static int ve_drv_wait_exception(struct file *filp, uint64_t __user *user_exs)
 {
 	struct ve_task *task;
 	struct ve_dev *vedev;
@@ -527,7 +527,7 @@ _ve_drv_assign_task_to_core(struct ve_dev *vedev, pid_t tid_ns, int core_id)
  *         -EINVAL on invalid core ID in arg.
  *         -ESRCH on invalid task ID in arg.
  */
-int ve_drv_assign_task_to_core(struct ve_dev *vedev,
+static int ve_drv_assign_task_to_core(struct ve_dev *vedev,
 		struct ve_tid_core __user *arg)
 {
 	int err;
@@ -695,7 +695,7 @@ int ve_drv_unassign_task_from_core(struct ve_dev *vedev, pid_t tid_ns, int check
  *                 VE task can not be unassigned now.
  *         -ESRCH if the VE task of the ID is not found.
  */
-int ve_drv_del_ve_task(struct ve_dev *vedev, pid_t tid_ns)
+static int ve_drv_del_ve_task(struct ve_dev *vedev, pid_t tid_ns)
 {
 	struct ve_node *node = vedev->node;
 	struct list_head *head = &node->task_head;
@@ -767,7 +767,7 @@ int ve_drv_del_ve_task(struct ve_dev *vedev, pid_t tid_ns)
  *         -EINVAL if the VE task is in non-revival state.
  *         -ESRCH if the VE task of the ID is not found.
  */
-int ve_drv_revive_ve_task(struct ve_dev *vedev, pid_t tid_ns)
+static int ve_drv_revive_ve_task(struct ve_dev *vedev, pid_t tid_ns)
 {
 	struct ve_node *node = vedev->node;
 	struct list_head *head = &node->task_head;
@@ -993,7 +993,7 @@ found:
  * @return 0 on success.
  *         -ESRCH if VE task ID is not found
  */
-int ve_drv_add_ve_task(struct ve_dev *vedev, pid_t tid_ns)
+static int ve_drv_add_ve_task(struct ve_dev *vedev, pid_t tid_ns)
 {
 	struct ve_node *node = vedev->node;
 	struct list_head *head = &node->task_head;
@@ -1038,7 +1038,7 @@ int ve_drv_add_ve_task(struct ve_dev *vedev, pid_t tid_ns)
  * @return 0 on success.
  *         -EINVAL if the core ID is invalid.
  */
-int ve_drv_reset_intr_count(struct ve_dev *vedev, uint64_t core_id)
+static int ve_drv_reset_intr_count(struct ve_dev *vedev, uint64_t core_id)
 {
 	/* Do nothing */
 
@@ -1102,7 +1102,7 @@ int ve_drv_generic_arch_wait_intr(struct ve_dev *vedev,
  *         -EINTR if it is interrupted by signal.
  *         -ETIMEDOUT in case of timeout.
  */
-int ve_drv_wait_intr(struct ve_dev *vedev, struct ve_wait_irq_arg *usr)
+static int ve_drv_wait_intr(struct ve_dev *vedev, struct ve_wait_irq_arg *usr)
 {
 	int ret, retval;
 
@@ -1160,7 +1160,7 @@ int ve_drv_wait_intr(struct ve_dev *vedev, struct ve_wait_irq_arg *usr)
  *         -EINVAL if the argument is incorrect or UID is already assigned.
  *         -ENOMEM on lacking of memory.
  */
-int ve_drv_assign_cr(struct ve_dev *vedev, struct ve_cr_assign *usr)
+static int ve_drv_assign_cr(struct ve_dev *vedev, struct ve_cr_assign *usr)
 {
 	int err;
 	struct ve_cr_assign arg;
@@ -1256,7 +1256,7 @@ void ve_drv_unassign_cr_all(struct ve_dev *vedev)
  * @return 0 on success.
  *         -EINVAL if the argument is incorrect or UID is already assigned.
  */
-int ve_drv_unassign_cr(struct ve_dev *vedev, struct ve_cr_assign *usr)
+static int ve_drv_unassign_cr(struct ve_dev *vedev, struct ve_cr_assign *usr)
 {
 	int err;
 	struct ve_cr_assign arg;
@@ -1339,7 +1339,7 @@ void ve_drv_unassign_vemem_all(struct ve_dev *vedev)
  *
  * @return 0 on success.
  */
-int ve_drv_assign_vemem(struct ve_dev *vedev, struct ve_pcimem_assign *usr)
+static int ve_drv_assign_vemem(struct ve_dev *vedev, struct ve_pcimem_assign *usr)
 {
 	int err;
 	struct ve_pcimem_assign arg;
@@ -1399,7 +1399,7 @@ int ve_drv_assign_vemem(struct ve_dev *vedev, struct ve_pcimem_assign *usr)
  *
  * @return 0 on success.
  */
-int ve_drv_unassign_vemem(struct ve_dev *vedev, struct ve_pcimem_assign *usr)
+static int ve_drv_unassign_vemem(struct ve_dev *vedev, struct ve_pcimem_assign *usr)
 {
 	int err;
 	struct ve_pcimem_assign arg;
@@ -1451,7 +1451,7 @@ int ve_drv_unassign_vemem(struct ve_dev *vedev, struct ve_pcimem_assign *usr)
  * @return 0 on success.
  *         -EINVAL if the argument is invalid or EXSRAR is not available.
  */
-int ve_drv_reset_exsrar_mem(struct ve_dev *vedev, int core_id)
+static int ve_drv_reset_exsrar_mem(struct ve_dev *vedev, int core_id)
 {
 	struct ve_node *node = vedev->node;
 
@@ -1504,7 +1504,7 @@ static int ve_check_permission(const struct ve_dev *vedev, unsigned int cmd)
 	return 0;
 }
 
-long ve_drv_cmd_vhva_to_vsaa(struct ve_dev *dev,
+static long ve_drv_cmd_vhva_to_vsaa(struct ve_dev *dev,
 		struct ve_vp __user *uptr, int pindown)
 {
 	int ret;
@@ -1525,7 +1525,7 @@ long ve_drv_cmd_vhva_to_vsaa(struct ve_dev *dev,
 	return ret;
 }
 
-long ve_drv_cmd_vhva_to_vsaa_blk(struct ve_dev *dev,
+static long ve_drv_cmd_vhva_to_vsaa_blk(struct ve_dev *dev,
 		struct ve_vp_blk __user *uptr, int pindown)
 {
 	int ret;
@@ -1546,7 +1546,7 @@ long ve_drv_cmd_vhva_to_vsaa_blk(struct ve_dev *dev,
 	return ret;
 }
 
-long ve_drv_cmd_release_pd_page(struct ve_dev *dev,
+static long ve_drv_cmd_release_pd_page(struct ve_dev *dev,
 		struct ve_vp_release __user *uptr, int all)
 {
 	int ret;
@@ -1576,7 +1576,7 @@ err:
 	return ret;
 }
 
-long ve_drv_cmd_count_pd_page(struct ve_dev *dev,
+static long ve_drv_cmd_count_pd_page(struct ve_dev *dev,
 		struct ve_vp_release __user *uptr)
 {
 	int ret;
@@ -1599,7 +1599,7 @@ long ve_drv_cmd_count_pd_page(struct ve_dev *dev,
 }
 
 
-pid_t ve_drv_host_pid(struct ve_dev *dev, struct ve_get_host_pid *arg)
+static pid_t ve_drv_host_pid(struct ve_dev *dev, struct ve_get_host_pid *arg)
 {
 	int err;
 	struct ve_get_host_pid tmp;
@@ -1650,7 +1650,7 @@ pid_t ve_drv_host_pid(struct ve_dev *dev, struct ve_get_host_pid *arg)
 	return pid;
 }
 
-long ve_drv_cmd_release_pd_page_blk(struct ve_dev *dev,
+static long ve_drv_cmd_release_pd_page_blk(struct ve_dev *dev,
 		struct ve_vp_blk_release __user *uptr)
 {
 	int ret;

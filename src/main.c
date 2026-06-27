@@ -116,7 +116,7 @@ static const struct file_operations ve_fops = {
  * @brief Probe VE architecture model/type
  *
  */
-const struct ve_arch_class *ve_drv_probe_arch_class(struct ve_dev *vedev)
+static const struct ve_arch_class *ve_drv_probe_arch_class(struct ve_dev *vedev)
 {
 	const struct ve_arch_class *ret;
 	struct pci_dev *pdev = vedev->pdev;
@@ -908,7 +908,7 @@ int ve_drv_enable_irqs(struct ve_dev *vedev)
 }
 
 
-int ve_prepare_for_link_down(struct ve_dev *vedev, u16 *aer_cap,
+static int ve_prepare_for_link_down(struct ve_dev *vedev, u16 *aer_cap,
 					int sbr)
 {
 	struct pci_dev *pdev = vedev->pdev;

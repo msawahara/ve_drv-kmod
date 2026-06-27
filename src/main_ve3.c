@@ -667,7 +667,7 @@ static bool ve_drv_ve3_pcie_has_flr(struct pci_dev *dev)
 	return cap & PCI_EXP_DEVCAP_FLR;
 }
 
-int ve3_init_hw_check(struct ve_dev *vedev, int notify)
+static int ve3_init_hw_check(struct ve_dev *vedev, int notify)
 {
 	int err;
 	int sensor_num;
@@ -694,13 +694,13 @@ int ve3_init_hw_check(struct ve_dev *vedev, int notify)
 	return err;
 }
 
-int ve3_init_early(struct ve_dev *vedev)
+static int ve3_init_early(struct ve_dev *vedev)
 {
   return ve3_wait_hw_identifier(vedev, wait_sec_ve_init_done, -1);
 }
 
 
-int ve3_init_hw_check_early(struct ve_dev *vedev)
+static int ve3_init_hw_check_early(struct ve_dev *vedev)
 {
   return ve3_init_hw_check(vedev, 0);
 

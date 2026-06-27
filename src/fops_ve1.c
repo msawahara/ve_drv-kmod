@@ -147,7 +147,7 @@ int ve_drv_ve1_ioctl_check_permission(const struct ve_dev *vedev,
 	}
 }
 
-int ve_drv_compat_ve1_wait_intr(struct ve_dev *vedev,
+static int ve_drv_compat_ve1_wait_intr(struct ve_dev *vedev,
 				struct ve1_compat_wait_irq_arg *usr)
 {
 	int ret, retval;
