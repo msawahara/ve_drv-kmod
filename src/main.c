@@ -123,7 +123,7 @@ const struct ve_arch_class *ve_drv_probe_arch_class(struct ve_dev *vedev)
 	ve_arch_probe_func_t **p;
 	for (p = ve_arch_probe_table; *p; ++p) {
 		ret = (**p)(vedev);
-		if (ret > 0) {
+		if (ret != NULL) {
 			pdev_dbg(pdev, "probe succeeded (%s)\n",
 				ret->name);
 			return ret;

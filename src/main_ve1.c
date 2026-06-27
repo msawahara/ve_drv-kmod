@@ -537,7 +537,7 @@ const struct ve_arch_class *ve_arch_probe_ve1(struct ve_dev *vedev)
 
 	/* check header version */
 	if (info.version != 1) {
-		return 0;
+		return NULL;
 	}
 	/* check model */
 	switch (info.model) {
@@ -547,7 +547,7 @@ const struct ve_arch_class *ve_arch_probe_ve1(struct ve_dev *vedev)
 		/* supported */
 		break;
 	default:
-		return 0;
+		return NULL;
 	}
 	return &vedrv_ve1_arch_class;
 }
